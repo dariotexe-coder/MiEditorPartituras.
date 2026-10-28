@@ -10,7 +10,15 @@
 <style>
 
 :root{font-family:system-ui,Arial,sans-serif;color:#19243b;background:#eef2f8}*{box-sizing:border-box}body{margin:0;padding:12px;max-width:1050px;margin-inline:auto}h1{text-align:center;font-size:clamp(21px,5vw,30px)}h2{font-size:18px;margin:0 0 10px}.panel{background:white;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 10px #14233b12}.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}button,input,select{font:inherit;border:1px solid #c6cfdf;border-radius:8px;padding:10px;background:white;color:inherit}button{cursor:pointer}button.active{background:#2458bd;color:white;border-color:#2458bd}button:disabled{opacity:.45}input{max-width:100%;width:270px}#scoreWrap{overflow-x:auto;touch-action:pan-x}#staff{width:100%;min-width:330px;display:block;touch-action:manipulation}#piano{display:flex;overflow-x:auto;padding:12px 2px 8px;min-height:132px}.key{min-width:43px;height:120px;border:1px solid #333;border-radius:0 0 6px 6px;background:#fff;position:relative;flex-shrink:0;padding:0}.key.black{background:#222;color:#fff;height:76px;min-width:29px;margin:0 -14.5px;z-index:2}.key span{position:absolute;bottom:7px;left:3px;font-size:11px}.small{font-size:13px;color:#58657a}.status{min-height:20px;color:#2458bd}#fileInput{display:none}@media print{body{background:white}h1,.toolbar,#piano,.small,.status,.noprint{display:none!important}.panel{box-shadow:none;margin:0;padding:0}#staff{width:100%;min-width:0}#scoreWrap{overflow:visible}input{border:0;font-size:18px}button{display:none}}
-</style></head><body>
+</style></head><script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script><body>
 <h1>🎼 MiEditorPartituras</h1>
 <div class="panel"><label for="titulo">Título de la partitura</label><div><input id="titulo" value="Mi primera partitura" maxlength="100"></div><p class="small">Clave de sol · Compás 4/4 · Tocá el pentagrama o el piano para agregar notas. Los compases se crean automáticamente.</p>
 <div class="toolbar" id="figuras"><button data-d="4">Redonda</button><button data-d="2">Blanca</button><button data-d="1" class="active">Negra</button><button data-d="0.5">Corchea</button></div>
