@@ -1,0 +1,19 @@
+MI EDITOR DE PARTITURAS - PROYECTO ANDROID
+
+Este archivo ZIP contiene el codigo fuente de una aplicacion Android que muestra el editor HTML V6 en un WebView sin conexion a Internet.
+
+PARA COMPILAR APK EN ANDROID STUDIO:
+1. Instalar Android Studio con Android SDK 35 y JDK 17.
+2. Abrir la carpeta MiEditorPartiturasAndroid como proyecto.
+3. Esperar la sincronizacion de Gradle (necesita Internet para descargar dependencias si no estan instaladas).
+4. Menu Build > Build Bundle(s) / APK(s) > Build APK(s).
+5. APK de depuracion: app/build/outputs/apk/debug/app-debug.apk
+6. Para distribuir, generar un APK firmado desde Build > Generate Signed Bundle / APK.
+
+LIMITACIONES Y PENDIENTES:
+- No se ha compilado ni probado en un dispositivo Android.
+- El PDF depende de la impresion del WebView; puede necesitar ajustes.
+- El selector HTML de archivos y la descarga de JSON pueden requerir puentes nativos de Android para funcionar correctamente en WebView.
+- La escritura musical sigue siendo simplificada: faltan ligaduras, agrupacion profesional y distribucion precisa de compases.
+- El almacenamiento automatico depende de los datos locales de la aplicacion.
+- La reproduccion de audio puede depender de permisos de audio y politicas del WebView.

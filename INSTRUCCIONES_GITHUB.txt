@@ -1,0 +1,6 @@
+1. Crear repositorio GitHub (puede ser privado).
+2. Subir el contenido de esta carpeta, manteniendo .github/workflows/android.yml y app/.
+3. Ir a Actions > Compilar APK Android > Run workflow.
+4. Cuando termine, descargar el artefacto MiEditorPartituras-APK.
+5. Extraer el ZIP descargado e instalar app-debug.apk.
+Aviso: es un APK de prueba (debug), no publicado en Play Store. Guardar/exportar JSON desde WebView puede requerir cambios nativos.
