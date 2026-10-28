@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MiEditorPartituras</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f2f4f8;margin:0;padding:12px;color:#172238}
+h1{text-align:center;font-size:23px}
+.panel{background:white;border-radius:12px;padding:12px;margin:12px 0;box-shadow:0 2px 8px #0001}
+button,select{padding:10px;margin:3px;border:1px solid #ccd3df;border-radius:8px;background:white;font-size:15px}
+button.active{background:#2458bd;color:white}
+svg{width:100%;height:auto;touch-action:manipulation}
+#piano{display:flex;overflow-x:auto;padding:12px 0}
+.key{min-width:42px;height:115px;border:1px solid #333;border-radius:0 0 6px 6px;background:white;position:relative;flex-shrink:0}
+.key.black{background:#222;color:white;height:75px;min-width:30px;margin:0 -15px;z-index:2}
+.key span{position:absolute;bottom:8px;left:4px;font-size:12px}
+.small{font-size:13px;color:#566}
+</style>
+</head>
+<body>
+<h1>🎼 MiEditorPartituras</h1>
+<div class="panel">
+<label>Título: <input id="titulo" value="Mi primera partitura"></label>
+<p class="small">Compás 4/4 · Clave de sol</p>
+<div id="figuras">
+<button data-d="4">Redonda</button>
+<button data-d="2">Blanca</button>
+<button data-d="1" class="active">Negra</button>
+<button data-d=".5">Corchea</button>
+</div>
+<svg id="staff" viewBox="0 0 600 210" aria-label="Pentagrama interactivo"></svg>
+<p class="small">Tocá una altura del pentagrama para escribir una nota. También podés usar el piano.</p>
+<button id="undo">↶ Deshacer</button>
+<button id="clear">Borrar todo</button>
+<button id="play">▶ Escuchar</button>
+</div>
+<div class="panel">
+<h3>🎹 Piano virtual</h3>
+<div id="piano"></div>
+</div>
+<div class="panel">
+<button id="save">Guardar partitura</button>
+<button id="load">Recuperar partitura</button>
+<p id="status" class="small"></p>
+</div>
+<script>
+const svg=document.getElementById("staff");
+const piano=document.getElementById("piano");
+let notes=[],duration=1,audio;
+const names=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const natural=["C","D","E","F","G","A","B"];
+const pitchIndex=["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5","B5","C6"];
+function midi(p){let m=p.match(/^([A-G])(#?)(\d)$/);return (Number(m[3])+1)*12+names.indexOf(m[1]+m[2])}
+function sound(p,time=.35){
+audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+if(audio.state==="suspended")audio.resume();
+const o=audio.createOscillator(),g=audio.createGain();
+o.type="sine";o.frequency.value=440*Math.pow(2,(midi(p)-69)/12);
+g.gain.setValueAtTime(.12,audio.currentTime);
+g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+time);
+o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+time);
+}
+function el(tag,attrs={},parent=svg){
+let e=document.createElementNS("http://www.w3.org/2000/svg",tag);
+Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+parent.appendChild(e);return e;
+}
+function draw(){
+svg.innerHTML="";
+for(let i=0;i<5;i++)el("line",{x1:55,y1:75+i*12,x2:590,y2:75+i*12,stroke:"#333","stroke-width":1.5});
+el("text",{x:12,y:120,"font-size":75,fill:"#111"}).textContent="𝄞";
+notes.forEach((n,i)=>{
+let idx=pitchIndex.indexOf(n.p.replace("#",""));
+if(idx<0)return;
+let x=85+i*45,y=147-idx*6;
+if(y>=135||y<=63){
+for(let ly=135;ly>=y;ly-=12)if(y<=63)el("line",{x1:x-13,x2:x+13,y1:ly,y2:ly,stroke:"#333"});
+if(y>=135)for(let ly=135;ly<=y;ly+=12)el("line",{x1:x-13,x2:x+13,y1:ly,y2:ly,stroke:"#333"});
+}
+el("ellipse",{cx:x,cy:y,rx:8,ry:5.5,transform:`rotate(-20 ${x} ${y})`,fill:n.d>=2?"white":"#111",stroke:"#111","stroke-width":2});
+if(n.d!==4)el("line",{x1:x+7,y1:y,x2:x+7,y2:y-34,stroke:"#111","stroke-width":2});
+if(n.d===.5)el("path",{d:`M${x+7} ${y-34} q22 8 12 23`,fill:"none",stroke:"#111","stroke-width":2});
+if(n.p.includes("#"))el("text",{x:x-22,y:y+5,"font-size":19}).textContent="♯";
+});
+}
+function add(p){if(notes.length>=11){alert("Esta versión admite 11 notas por línea.");return}
+notes.push({p,d:duration});draw();sound(p);}
+document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{
+duration=Number(b.dataset.d);
+document.querySelectorAll("[data-d]").forEach(x=>x.classList.remove("active"));
+b.classList.add("active");
+});
+svg.addEventListener("click",e=>{
+let pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+let pos=pt.matrixTransform(svg.getScreenCTM().inverse());
+let idx=Math.max(0,Math.min(14,Math.round((147-pos.y)/6)));
+add(pitchIndex[idx]);
+});
+for(let oct=4;oct<=5;oct++){
+names.forEach(n=>{
+let p=n+oct;
+let b=document.createElement("button");
+b.className="key"+(n.includes("#")?" black":"");
+b.innerHTML="<span>"+p.replace("#","♯")+"</span>";
+b.onclick=()=>add(p);piano.appendChild(b);
+});
+}
+document.getElementById("undo").onclick=()=>{notes.pop();draw()};
+document.getElementById("clear").onclick=()=>{if(confirm("¿Borrar todas las notas?")){notes=[];draw()}};
+document.getElementById("save").onclick=()=>{
+localStorage.setItem("miPartitura",JSON.stringify({notes,title:document.getElementById("titulo").value}));
+document.getElementById("status").textContent="Partitura guardada en este navegador.";
+};
+document.getElementById("load").onclick=()=>{
+let data=localStorage.getItem("miPartitura");
+if(!data){alert("No hay una partitura guardada.");return}
+let obj=JSON.parse(data);notes=obj.notes||[];
+document.getElementById("titulo").value=obj.title||"Mi partitura";draw();
+};
+document.getElementById("play").onclick=async()=>{
+for(const n of notes){sound(n.p,Math.max(.15,n.d*.35));await new Promise(r=>setTimeout(r,n.d*400));}
+};
+draw();
+</script>
+</body>
+</html>
